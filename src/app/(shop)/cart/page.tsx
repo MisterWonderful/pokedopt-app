@@ -85,7 +85,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="text-lg font-bold">
-                    ${(item.card.price * item.qty).toFixed(2)}
+                    ${(Number(item.card.price) * item.qty).toFixed(2)}
                   </div>
                   <div className="flex items-center gap-1 rounded-lg border-[1.5px] border-pd-ink/20">
                     <button

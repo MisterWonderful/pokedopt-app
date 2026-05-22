@@ -140,13 +140,20 @@ export default async function CardDetailPage({
                   Adoption fee
                 </div>
                 <div className="font-fraunces text-[40px] font-bold leading-none tabular-nums">
-                  ${card.price.toFixed(2)}
+                  ${Number(card.price).toFixed(2)}
                 </div>
                 <div className="mt-1 text-[13px] opacity-75">
                   Includes shelter proceeds
                 </div>
               </div>
-              <AddToCartButton card={card} size="lg" />
+              <AddToCartButton
+                card={{
+                  ...card,
+                  price: Number(card.price),
+                  donation: Number(card.donation),
+                }}
+                size="lg"
+              />
             </div>
           </div>
         </div>

@@ -364,7 +364,7 @@ function Certificate({ card, onReset }: { card: Card; onReset: () => void }) {
                   A partner shelter
                 </div>
                 <div className="mt-1 text-[13.5px] text-pd-ink-soft">
-                  ${card.donation.toFixed(2)} donated when this card was adopted.
+                  ${Number(card.donation).toFixed(2)} donated when this card was adopted.
                 </div>
               </div>
             </div>

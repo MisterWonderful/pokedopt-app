@@ -125,7 +125,7 @@ export default function AdminCardsPage() {
             <RarityBadge rarity={c.rarity} />
             <div className="text-[13px] font-bold tabular-nums">{c.hp}</div>
             <div className="text-sm font-bold tabular-nums">
-              ${c.price.toFixed(2)}
+              ${Number(c.price).toFixed(2)}
             </div>
             <div className="flex gap-1.5">
               <Link href={`/card/${c.id}`}>

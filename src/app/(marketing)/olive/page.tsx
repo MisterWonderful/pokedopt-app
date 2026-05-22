@@ -330,7 +330,7 @@ export default function OlivePage() {
                   <Button
                     onClick={() => addItem(match.primary as any)}
                   >
-                    <img src="/images/pokedopt-logo.png" alt="" width={16} height={16} /> Adopt for ${match.primary.price.toFixed(2)}
+                    <img src="/images/pokedopt-logo.png" alt="" width={16} height={16} /> Adopt for ${Number(match.primary.price).toFixed(2)}
                   </Button>
                   <Link href={`/card/${match.primary.id}`}
                   >

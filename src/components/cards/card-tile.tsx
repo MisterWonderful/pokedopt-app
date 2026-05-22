@@ -27,6 +27,7 @@ interface CardTileProps {
 export function CardTile({ card }: CardTileProps) {
   const [hover, setHover] = useState(false);
   const { addItem } = useCart();
+  const price = typeof card.price === "number" ? card.price : Number(card.price);
 
   return (
     <div
@@ -52,7 +53,7 @@ export function CardTile({ card }: CardTileProps) {
           {card.middle} {card.last}
         </div>
         <div className="mt-0.5 text-lg font-bold tabular-nums text-pd-ink">
-          ${card.price.toFixed(2)}
+          ${price.toFixed(2)}
         </div>
         <div className="mt-2 flex justify-center gap-1.5">
           <Button
