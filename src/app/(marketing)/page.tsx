@@ -11,9 +11,10 @@ async function getHomeData() {
     orderBy: { createdAt: "asc" },
     take: 10,
   });
+  const serialize = (c: any) => ({ ...c, price: Number(c.price), donation: Number(c.donation) });
   return {
-    featured: cards.slice(0, 4),
-    newlyAdded: cards.slice(4, 10),
+    featured: cards.slice(0, 4).map(serialize),
+    newlyAdded: cards.slice(4, 10).map(serialize),
   };
 }
 

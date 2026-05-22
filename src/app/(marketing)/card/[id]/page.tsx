@@ -169,7 +169,7 @@ export default async function CardDetailPage({
             </h2>
             <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
               {related.map((c) => (
-                <CardTile key={c.id} card={c} />
+                <CardTile key={c.id} card={{ ...c, price: Number(c.price) }} />
               ))}
             </div>
           </div>
