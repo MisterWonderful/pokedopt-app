@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
@@ -14,7 +16,6 @@ export async function GET(
     return NextResponse.json({ error: "Card not found" }, { status: 404 });
   }
 
-  // Get related cards (same type)
   const related = await prisma.card.findMany({
     where: {
       id: { not: card.id },
@@ -25,4 +26,84 @@ export async function GET(
   });
 
   return NextResponse.json({ card, related });
+}
+
+const patchSchema = z.object({
+  pokeId: z.coerce.number().int().min(1).optional(),
+  name: z.string().min(1).optional(),
+  middle: z.string().min(1).optional(),
+  last: z.string().min(1).optional(),
+  types: z.array(z.string()).min(1).optional(),
+  rarity: z.enum(["common", "uncommon", "rare", "legendary"]).optional(),
+  hp: z.coerce.number().int().min(1).optional(),
+  grade: z.string().min(1).optional(),
+  price: z.coerce.number().min(0).optional(),
+  donation: z.coerce.number().min(0).optional(),
+  backstory: z.string().optional(),
+  wear: z.string().optional(),
+  birthday: z.string().optional(),
+  birthMonth: z.string().optional(),
+  birthYear: z.string().optional(),
+  sprite: z.string().optional(),
+  spritePixel: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const session = await auth();
+  if (session?.user?.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const parsed = patchSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid card data", issues: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const data: any = { ...parsed.data };
+  if (parsed.data.name || parsed.data.middle || parsed.data.last) {
+    const existing = await prisma.card.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Card not found" }, { status: 404 });
+    }
+    const name = parsed.data.name ?? existing.name;
+    const middle = parsed.data.middle ?? existing.middle;
+    const last = parsed.data.last ?? existing.last;
+    data.fullName = `${name} ${middle} ${last}`.trim();
+  }
+
+  const card = await prisma.card.update({
+    where: { id },
+    data,
+  });
+
+  return NextResponse.json({ card });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const session = await auth();
+  if (session?.user?.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const orderItemCount = await prisma.orderItem.count({ where: { cardId: id } });
+  if (orderItemCount > 0) {
+    const card = await prisma.card.update({
+      where: { id },
+      data: { isActive: false },
+    });
+    return NextResponse.json({ card, archived: true });
+  }
+
+  await prisma.card.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
 }

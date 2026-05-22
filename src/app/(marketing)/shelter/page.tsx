@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Heart } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getShelterData() {
   const shelters = await prisma.shelter.findMany({
     where: { isActive: true },

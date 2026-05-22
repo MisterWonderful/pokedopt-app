@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { GradedSlab } from "@/components/cards/graded-slab";
 import { CardTile } from "@/components/cards/card-tile";

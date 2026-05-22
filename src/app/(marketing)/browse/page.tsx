@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { CardTile } from "@/components/cards/card-tile";
 import { TypeChip } from "@/components/cards/type-chip";
@@ -8,6 +8,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Bird } from "lucide-react";
 import { POKEMON_TYPES } from "@/lib/constants";
+
+export default function BrowsePageWrapper() {
+  return (
+    <Suspense fallback={<BrowseSkeleton />}>
+      <BrowsePage />
+    </Suspense>
+  );
+}
+
+function BrowseSkeleton() {
+  return (
+    <div className="mx-auto max-w-[1280px] px-8 py-10">
+      <div className="h-8 w-48 animate-pulse rounded bg-pd-ink/10" />
+      <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="h-[320px] animate-pulse rounded-2xl bg-pd-ink/5" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface Card {
   id: string;
@@ -24,7 +45,7 @@ interface Card {
   spritePixel: string;
 }
 
-export default function BrowsePage() {
+function BrowsePage() {
   const searchParams = useSearchParams();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);

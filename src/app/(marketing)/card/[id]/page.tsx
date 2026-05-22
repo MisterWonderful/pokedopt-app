@@ -10,6 +10,8 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { CardTile } from "@/components/cards/card-tile";
 import { BookOpen, Heart } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function CardDetailPage({
   params,
 }: {

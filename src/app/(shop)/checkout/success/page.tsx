@@ -1,12 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 
-export default function CheckoutSuccessPage() {
+export default function CheckoutSuccessPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-[720px] px-8 py-16 text-center">
+          <h1 className="font-fraunces text-2xl font-bold text-pd-ink">Confirming your order…</h1>
+        </div>
+      }
+    >
+      <CheckoutSuccessPage />
+    </Suspense>
+  );
+}
+
+function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { clearCart } = useCart();
