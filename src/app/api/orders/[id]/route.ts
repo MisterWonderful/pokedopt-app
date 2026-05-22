@@ -4,8 +4,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -15,7 +16,7 @@ export async function PATCH(
   const { status } = body;
 
   const order = await prisma.order.update({
-    where: { id: params.id },
+    where: { id },
     data: { status },
   });
 
