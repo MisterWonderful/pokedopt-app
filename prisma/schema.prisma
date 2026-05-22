@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(customer)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@map("users")
+}
+
+enum Role {
+  customer
+  admin
+}
+
+model Card {
+  id          String   @id @default(cuid())
+  pokeId      Int      @map("poke_id")
+  name        String
+  middle      String
+  last        String
+  fullName    String   @map("full_name")
+  types       String[]
+  rarity      Rarity
+  hp          Int
+  grade       String
+  price       Decimal  @db.Decimal(10, 2)
+  donation    Decimal  @db.Decimal(10, 2)
+  backstory   String   @db.Text
+  wear        String   @db.Text
+  birthday    String
+  birthMonth  String   @map("birth_month")
+  birthYear   String   @map("birth_year")
+  sprite      String
+  spritePixel String   @map("sprite_pixel")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  orderItems OrderItem[]
+
+  @@map("cards")
+}
+
+enum Rarity {
+  common
+  uncommon
+  rare
+  legendary
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNum    String      @unique @map("order_num")
+  userId      String?     @map("user_id")
+  status      OrderStatus @default(placed)
+  placedAt    DateTime    @default(now()) @map("placed_at")
+  subtotal    Decimal     @db.Decimal(10, 2)
+  donation    Decimal     @db.Decimal(10, 2)
+  shippingFee Decimal     @db.Decimal(10, 2) @map("shipping_fee")
+  total       Decimal     @db.Decimal(10, 2)
+  shelterPref String      @default("auto") @map("shelter_pref")
+
+  customerName    String @map("customer_name")
+  customerEmail   String @map("customer_email")
+  shippingName    String @map("shipping_name")
+  shippingAddress String @map("shipping_address")
+  shippingCity    String @map("shipping_city")
+  shippingZip     String @map("shipping_zip")
+  shippingCountry String @default("United States") @map("shipping_country")
+
+  stripePaymentIntentId String?   @unique @map("stripe_payment_intent_id")
+  stripeCustomerId      String?   @map("stripe_customer_id")
+  paidAt                DateTime? @map("paid_at")
+
+  user       User?       @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  placed
+  shipped
+  delivered
+  cancelled
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  orderId  String @map("order_id")
+  cardId   String @map("card_id")
+  qty      Int
+  priceAt  Decimal @db.Decimal(10, 2) @map("price_at")
+  nameAt   String  @map("name_at")
+  middleAt String  @map("middle_at")
+  lastAt   String  @map("last_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  card  Card  @relation(fields: [cardId], references: [id])
+
+  @@map("order_items")
+}
+
+model Shelter {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  location    String
+  description String? @db.Text
+  imageUrl    String? @map("image_url")
+  raised      Decimal @default(0) @db.Decimal(10, 2)
+  helped      Int     @default(0)
+  isActive    Boolean @default(true) @map("is_active")
+  sortOrder   Int     @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("shelters")
+}

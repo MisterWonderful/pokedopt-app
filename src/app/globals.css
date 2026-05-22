@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 44 100% 97%;
+    --foreground: 42 26% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 42 26% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 42 26% 13%;
+    --primary: 12 64% 46%;
+    --primary-foreground: 36 100% 96%;
+    --secondary: 36 100% 96%;
+    --secondary-foreground: 42 26% 13%;
+    --muted: 36 30% 94%;
+    --muted-foreground: 37 16% 42%;
+    --accent: 36 100% 96%;
+    --accent-foreground: 42 26% 13%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 42 26% 13% / 0.08;
+    --input: 42 26% 13% / 0.15;
+    --ring: 12 64% 46%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-pd-bg text-pd-ink antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom font face for Springwood Display */
+@font-face {
+  font-family: "Springwood Display";
+  src: url("/fonts/SpringwoodDisplay.otf") format("opentype");
+  font-display: swap;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2.5px solid #c44a2a;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Card tile holo shimmer */
+.card-tile:hover .pd-shimmer {
+  animation: pd-holo 1.4s ease-in-out;
+}
+
+@keyframes pd-holo {
+  0% {
+    background-position: 120% 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    background-position: -20% 0;
+    opacity: 0;
+  }
+}
+
+/* Print styles for certificates */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
