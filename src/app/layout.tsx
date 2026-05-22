@@ -3,7 +3,7 @@ import { Fraunces, Nunito } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/hooks/use-cart";
 import { Toaster } from "@/components/ui/toaster";
-import { SessionProvider } from "@/components/providers/session-provider";
+import { AuthProvider } from "@/components/providers/session-provider";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -35,12 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${nunito.variable}`}>
       <body className="font-nunito min-h-screen flex flex-col">
-        <SessionProvider>
+        <AuthProvider>
           <CartProvider>
             {children}
             <Toaster />
           </CartProvider>
-        </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );
