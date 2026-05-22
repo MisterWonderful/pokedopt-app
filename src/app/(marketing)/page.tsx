@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { GradedSlab } from "@/components/cards/graded-slab";
 import { CardTile } from "@/components/cards/card-tile";
-import { Paw, Sparkles, ArrowRight, Heart } from "lucide-react";
+import { PawPrint, Sparkles, ArrowRight, Heart } from "lucide-react";
 
 async function getHomeData() {
   const cards = await prisma.card.findMany({
@@ -36,7 +36,7 @@ export default async function HomePage() {
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border-[1.5px] border-pd-ink bg-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest shadow-[0_2px_0_#29261b]">
               <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-pd-primary-soft text-pd-primary">
-                <Paw size={12} strokeWidth={2} />
+                <PawPrint size={12} strokeWidth={2} />
               </span>
               Every card supports a shelter
             </div>
