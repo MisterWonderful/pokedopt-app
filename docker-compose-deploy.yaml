@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: pokedopt
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-pokedopt_secure_pass_2026}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: pokedopt
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -14,55 +12,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - coolify
-      - pokedopt
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://pokedopt:${DB_PASSWORD:-pokedopt_secure_pass_2026}@postgres:5432/pokedopt?schema=public
-      DIRECT_URL: postgresql://pokedopt:${DB_PASSWORD:-pokedopt_secure_pass_2026}@postgres:5432/pokedopt?schema=public
+      DATABASE_URL: postgresql://pokedopt:${DB_PASSWORD}@postgres:5432/pokedopt?schema=public
+      DIRECT_URL: postgresql://pokedopt:${DB_PASSWORD}@postgres:5432/pokedopt?schema=public
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://pokedopt.unschackle.com}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
       RESEND_API_KEY: ${RESEND_API_KEY}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-orders@pokedopt.unschackle.com}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://pokedopt.unschackle.com}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - coolify
-      - pokedopt
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.gzip.compress=true"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.http-0-pokedopt.entryPoints=http"
-      - "traefik.http.routers.http-0-pokedopt.middlewares=redirect-to-https"
-      - "traefik.http.routers.http-0-pokedopt.rule=Host(`pokedopt.unschackle.com`) && PathPrefix(`/`)"
-      - "traefik.http.routers.http-0-pokedopt.service=http-0-pokedopt"
-      - "traefik.http.routers.https-0-pokedopt.entryPoints=https"
-      - "traefik.http.routers.https-0-pokedopt.middlewares=gzip"
-      - "traefik.http.routers.https-0-pokedopt.rule=Host(`pokedopt.unschackle.com`) && PathPrefix(`/`)"
-      - "traefik.http.routers.https-0-pokedopt.service=https-0-pokedopt"
-      - "traefik.http.routers.https-0-pokedopt.tls=true"
-      - "traefik.http.routers.https-0-pokedopt.tls.certresolver=letsencrypt"
-      - "traefik.http.services.http-0-pokedopt.loadbalancer.server.port=3000"
-      - "traefik.http.services.https-0-pokedopt.loadbalancer.server.port=3000"
-      - "caddy_ingress_network=coolify"
 
 volumes:
   postgres_data:
-
-networks:
-  coolify:
-    external: true
-  pokedopt:
-    driver: bridge
