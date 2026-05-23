@@ -29,14 +29,14 @@ export async function GET(
 }
 
 const patchSchema = z.object({
-  pokeId: z.coerce.number().int().min(1).optional(),
+  pokeId: z.coerce.number().int().min(0).optional(),
   name: z.string().min(1).optional(),
-  middle: z.string().min(1).optional(),
-  last: z.string().min(1).optional(),
-  types: z.array(z.string()).min(1).optional(),
+  middle: z.string().optional(),
+  last: z.string().optional(),
+  types: z.array(z.string()).optional(),
   rarity: z.enum(["common", "uncommon", "rare", "legendary"]).optional(),
-  hp: z.coerce.number().int().min(1).optional(),
-  grade: z.string().min(1).optional(),
+  hp: z.coerce.number().int().min(0).optional(),
+  grade: z.string().optional(),
   price: z.coerce.number().min(0).optional(),
   donation: z.coerce.number().min(0).optional(),
   backstory: z.string().optional(),

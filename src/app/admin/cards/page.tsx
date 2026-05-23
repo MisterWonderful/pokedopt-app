@@ -189,7 +189,13 @@ export default function AdminCardsPage() {
     setSaving(false);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      setError(err.error || "Save failed");
+      const issues = err?.issues?.fieldErrors;
+      const detail = issues
+        ? Object.entries(issues)
+            .map(([k, v]) => `${k}: ${(v as string[]).join(", ")}`)
+            .join(" · ")
+        : "";
+      setError(detail ? `${err.error || "Save failed"} — ${detail}` : err.error || "Save failed");
       return;
     }
     setEditing(null);
