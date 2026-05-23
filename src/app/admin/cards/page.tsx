@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TypeChip } from "@/components/cards/type-chip";
 import { RarityBadge } from "@/components/cards/rarity-badge";
+import { CroppedArt } from "@/components/cards/graded-slab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, CreditCard, Pencil, Trash2, EyeOff, Eye, Upload } from "lucide-react";
@@ -11,6 +12,7 @@ import { POKEMON_TYPES } from "@/lib/constants";
 
 interface Card {
   id: string;
+  sku?: string | null;
   pokeId: number;
   name: string;
   middle: string;
@@ -29,6 +31,19 @@ interface Card {
   sprite: string;
   spritePixel: string;
   isActive: boolean;
+  setName?: string | null;
+  cardNumber?: string | null;
+  year?: string | null;
+  stage?: string | null;
+  illustrator?: string | null;
+  originalTitle?: string | null;
+  condition?: string | null;
+  imageUrl1?: string | null;
+  imageUrl2?: string | null;
+  artCropX?: number;
+  artCropY?: number;
+  artCropWidth?: number;
+  artCropHeight?: number;
 }
 
 type CardForm = Omit<Card, "id" | "price" | "donation"> & {
@@ -55,6 +70,20 @@ const EMPTY_FORM: CardForm = {
   sprite: "",
   spritePixel: "",
   isActive: true,
+  sku: "",
+  setName: "",
+  cardNumber: "",
+  year: "",
+  stage: "",
+  illustrator: "",
+  originalTitle: "",
+  condition: "",
+  imageUrl1: "",
+  imageUrl2: "",
+  artCropX: 0.07,
+  artCropY: 0.11,
+  artCropWidth: 0.86,
+  artCropHeight: 0.5,
 };
 
 export default function AdminCardsPage() {
@@ -123,6 +152,20 @@ export default function AdminCardsPage() {
         sprite: c.sprite,
         spritePixel: c.spritePixel,
         isActive: c.isActive,
+        sku: c.sku || "",
+        setName: c.setName || "",
+        cardNumber: c.cardNumber || "",
+        year: c.year || "",
+        stage: c.stage || "",
+        illustrator: c.illustrator || "",
+        originalTitle: c.originalTitle || "",
+        condition: c.condition || "",
+        imageUrl1: c.imageUrl1 || "",
+        imageUrl2: c.imageUrl2 || "",
+        artCropX: c.artCropX ?? 0.07,
+        artCropY: c.artCropY ?? 0.11,
+        artCropWidth: c.artCropWidth ?? 0.86,
+        artCropHeight: c.artCropHeight ?? 0.5,
       },
     });
 
@@ -420,7 +463,7 @@ function CardEditor({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-pd-ink/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-2xl border-2 border-pd-ink bg-white shadow-[0_8px_0_#29261b]">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl border-2 border-pd-ink bg-white shadow-[0_8px_0_#29261b]">
         <div className="sticky top-0 flex items-center justify-between border-b border-pd-ink/10 bg-white px-6 py-4">
           <h2 className="font-fraunces text-xl font-bold">
             {mode === "new" ? "New card" : "Edit card"}
@@ -579,7 +622,96 @@ function CardEditor({
             </Field>
           </div>
 
-          <Field label="Sprite URL">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="SKU">
+              <Input
+                value={form.sku || ""}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                placeholder="Pokedopt-S1-1"
+              />
+            </Field>
+            <Field label="Set name">
+              <Input
+                value={form.setName || ""}
+                onChange={(e) =>
+                  setForm({ ...form, setName: e.target.value })
+                }
+                placeholder="Base Set 2"
+              />
+            </Field>
+            <Field label="Card #">
+              <Input
+                value={form.cardNumber || ""}
+                onChange={(e) =>
+                  setForm({ ...form, cardNumber: e.target.value })
+                }
+                placeholder="50/130"
+              />
+            </Field>
+            <Field label="Year">
+              <Input
+                value={form.year || ""}
+                onChange={(e) => setForm({ ...form, year: e.target.value })}
+                placeholder="2000"
+              />
+            </Field>
+            <Field label="Stage">
+              <Input
+                value={form.stage || ""}
+                onChange={(e) => setForm({ ...form, stage: e.target.value })}
+                placeholder="Basic"
+              />
+            </Field>
+            <Field label="Illustrator">
+              <Input
+                value={form.illustrator || ""}
+                onChange={(e) =>
+                  setForm({ ...form, illustrator: e.target.value })
+                }
+                placeholder="Mitsuhiro Arita"
+              />
+            </Field>
+          </div>
+
+          <Field label="Card scan URL (Front · Image 1)">
+            <Input
+              value={form.imageUrl1 || ""}
+              onChange={(e) =>
+                setForm({ ...form, imageUrl1: e.target.value })
+              }
+              placeholder="https://images.carduploader.com/…"
+            />
+          </Field>
+          <Field label="Card scan URL (Back · Image 2)">
+            <Input
+              value={form.imageUrl2 || ""}
+              onChange={(e) =>
+                setForm({ ...form, imageUrl2: e.target.value })
+              }
+              placeholder="https://images.carduploader.com/…"
+            />
+          </Field>
+
+          {form.imageUrl1 && (
+            <CropTool
+              src={form.imageUrl1}
+              cropX={form.artCropX ?? 0.07}
+              cropY={form.artCropY ?? 0.11}
+              cropW={form.artCropWidth ?? 0.86}
+              cropH={form.artCropHeight ?? 0.5}
+              onChange={(c) =>
+                setForm({
+                  ...form,
+                  artCropX: c.x,
+                  artCropY: c.y,
+                  artCropWidth: c.w,
+                  artCropHeight: c.h,
+                })
+              }
+            />
+          )}
+
+          <Field label="Sprite URL (fallback for cards without a scan)">
             <Input
               value={form.sprite}
               onChange={(e) => setForm({ ...form, sprite: e.target.value })}
@@ -654,5 +786,228 @@ function Field({
       </div>
       {children}
     </label>
+  );
+}
+
+interface CropToolProps {
+  src: string;
+  cropX: number;
+  cropY: number;
+  cropW: number;
+  cropH: number;
+  onChange: (c: { x: number; y: number; w: number; h: number }) => void;
+}
+
+type DragMode = "new" | "move" | "resize-tl" | "resize-tr" | "resize-bl" | "resize-br" | null;
+
+function CropTool({ src, cropX, cropY, cropW, cropH, onChange }: CropToolProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    mode: DragMode;
+    startMouseX: number;
+    startMouseY: number;
+    startCropX: number;
+    startCropY: number;
+    startCropW: number;
+    startCropH: number;
+  } | null>(null);
+
+  const clamp = (v: number, min = 0, max = 1) => Math.max(min, Math.min(max, v));
+
+  const startDrag = (mode: DragMode) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const rx = (e.clientX - rect.left) / rect.width;
+    const ry = (e.clientY - rect.top) / rect.height;
+    dragRef.current = {
+      mode,
+      startMouseX: rx,
+      startMouseY: ry,
+      startCropX: cropX,
+      startCropY: cropY,
+      startCropW: cropW,
+      startCropH: cropH,
+    };
+    if (mode === "new") {
+      onChange({ x: rx, y: ry, w: 0.01, h: 0.01 });
+    }
+    const onMove = (ev: MouseEvent) => {
+      if (!containerRef.current || !dragRef.current) return;
+      const r = containerRef.current.getBoundingClientRect();
+      const mx = (ev.clientX - r.left) / r.width;
+      const my = (ev.clientY - r.top) / r.height;
+      const d = dragRef.current;
+      const dx = mx - d.startMouseX;
+      const dy = my - d.startMouseY;
+
+      if (d.mode === "new") {
+        const x = Math.min(d.startMouseX, mx);
+        const y = Math.min(d.startMouseY, my);
+        const w = Math.abs(mx - d.startMouseX);
+        const h = Math.abs(my - d.startMouseY);
+        onChange({
+          x: clamp(x),
+          y: clamp(y),
+          w: clamp(w, 0.01, 1 - clamp(x)),
+          h: clamp(h, 0.01, 1 - clamp(y)),
+        });
+      } else if (d.mode === "move") {
+        const nx = clamp(d.startCropX + dx, 0, 1 - d.startCropW);
+        const ny = clamp(d.startCropY + dy, 0, 1 - d.startCropH);
+        onChange({ x: nx, y: ny, w: d.startCropW, h: d.startCropH });
+      } else if (d.mode === "resize-br") {
+        onChange({
+          x: d.startCropX,
+          y: d.startCropY,
+          w: clamp(d.startCropW + dx, 0.02, 1 - d.startCropX),
+          h: clamp(d.startCropH + dy, 0.02, 1 - d.startCropY),
+        });
+      } else if (d.mode === "resize-tl") {
+        const nx = clamp(d.startCropX + dx, 0, d.startCropX + d.startCropW - 0.02);
+        const ny = clamp(d.startCropY + dy, 0, d.startCropY + d.startCropH - 0.02);
+        onChange({
+          x: nx,
+          y: ny,
+          w: d.startCropW - (nx - d.startCropX),
+          h: d.startCropH - (ny - d.startCropY),
+        });
+      } else if (d.mode === "resize-tr") {
+        const ny = clamp(d.startCropY + dy, 0, d.startCropY + d.startCropH - 0.02);
+        onChange({
+          x: d.startCropX,
+          y: ny,
+          w: clamp(d.startCropW + dx, 0.02, 1 - d.startCropX),
+          h: d.startCropH - (ny - d.startCropY),
+        });
+      } else if (d.mode === "resize-bl") {
+        const nx = clamp(d.startCropX + dx, 0, d.startCropX + d.startCropW - 0.02);
+        onChange({
+          x: nx,
+          y: d.startCropY,
+          w: d.startCropW - (nx - d.startCropX),
+          h: clamp(d.startCropH + dy, 0.02, 1 - d.startCropY),
+        });
+      }
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  const handleStyle: React.CSSProperties = {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    background: "#fff",
+    border: "2px solid #29261b",
+    borderRadius: 2,
+  };
+
+  return (
+    <div className="rounded-xl border border-pd-ink/15 bg-pd-cream p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-pd-ink-muted">
+            Crop the Pokémon art
+          </div>
+          <div className="text-xs text-pd-ink-soft">
+            Drag on the image to select. Drag the corners to resize. Right-side preview shows how it'll fill the slab's art window.
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          type="button"
+          onClick={() =>
+            onChange({ x: 0.07, y: 0.11, w: 0.86, h: 0.5 })
+          }
+        >
+          Reset
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-[1fr_180px] gap-4">
+        {/* Image with crop overlay */}
+        <div
+          ref={containerRef}
+          className="relative select-none overflow-hidden rounded-lg border border-pd-ink/15 bg-white"
+          style={{ aspectRatio: "5 / 7" }}
+          onMouseDown={startDrag("new")}
+        >
+          <img
+            src={src}
+            alt="card scan"
+            className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+            draggable={false}
+          />
+          {/* Dim outside crop */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "rgba(20,16,10,0.55)",
+              clipPath: `polygon(
+                0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+                ${cropX * 100}% ${cropY * 100}%,
+                ${cropX * 100}% ${(cropY + cropH) * 100}%,
+                ${(cropX + cropW) * 100}% ${(cropY + cropH) * 100}%,
+                ${(cropX + cropW) * 100}% ${cropY * 100}%,
+                ${cropX * 100}% ${cropY * 100}%
+              )`,
+            }}
+          />
+          {/* Crop rectangle */}
+          <div
+            className="absolute border-2 border-white shadow-[0_0_0_1px_#29261b]"
+            style={{
+              left: `${cropX * 100}%`,
+              top: `${cropY * 100}%`,
+              width: `${cropW * 100}%`,
+              height: `${cropH * 100}%`,
+              cursor: "move",
+            }}
+            onMouseDown={startDrag("move")}
+          >
+            <div style={{ ...handleStyle, top: -7, left: -7, cursor: "nwse-resize" }} onMouseDown={startDrag("resize-tl")} />
+            <div style={{ ...handleStyle, top: -7, right: -7, cursor: "nesw-resize" }} onMouseDown={startDrag("resize-tr")} />
+            <div style={{ ...handleStyle, bottom: -7, left: -7, cursor: "nesw-resize" }} onMouseDown={startDrag("resize-bl")} />
+            <div style={{ ...handleStyle, bottom: -7, right: -7, cursor: "nwse-resize" }} onMouseDown={startDrag("resize-br")} />
+          </div>
+        </div>
+
+        {/* Live preview matching slab's art window */}
+        <div>
+          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-pd-ink-muted">
+            Slab preview
+          </div>
+          <div
+            className="relative overflow-hidden rounded border-2 border-pd-ink/40 bg-white"
+            style={{ width: 160, height: 160 * (0.7 / 0.92) }}
+            title="How the crop appears inside the slab's art window"
+          >
+            <CroppedArt
+              src={src}
+              alt="preview"
+              cropX={cropX}
+              cropY={cropY}
+              cropW={cropW}
+              cropH={cropH}
+            />
+          </div>
+          <div className="mt-3 space-y-1 text-[10px] tabular-nums text-pd-ink-muted">
+            <div>X: {(cropX * 100).toFixed(1)}%</div>
+            <div>Y: {(cropY * 100).toFixed(1)}%</div>
+            <div>W: {(cropW * 100).toFixed(1)}%</div>
+            <div>H: {(cropH * 100).toFixed(1)}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

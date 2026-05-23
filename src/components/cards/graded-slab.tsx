@@ -21,6 +21,10 @@ interface Card {
   imageUrl2?: string | null;
   setName?: string | null;
   cardNumber?: string | null;
+  artCropX?: number | null;
+  artCropY?: number | null;
+  artCropWidth?: number | null;
+  artCropHeight?: number | null;
 }
 
 interface GradedSlabProps {
@@ -45,7 +49,6 @@ export function GradedSlab({
   const h = w * 1.27;
 
   const primary = POKEMON_TYPES[card.types[0]] || POKEMON_TYPES.normal;
-  const hasScan = !!card.imageUrl1;
 
   const frames = {
     classic: {
@@ -79,72 +82,6 @@ export function GradedSlab({
         flexShrink: 0,
       }}
     >
-      {hasScan ? (
-        <div
-          style={{
-            flex: 1,
-            background: "#fff",
-            border: "1.5px solid #29261b",
-            borderRadius: 8,
-            position: "relative",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Image
-            src={card.imageUrl1 as string}
-            alt={card.name}
-            width={Math.round(w)}
-            height={Math.round(w * 1.4)}
-            className="absolute inset-0 h-full w-full object-cover"
-            unoptimized
-          />
-          <div
-            className="pd-shimmer pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 45%, transparent 60%)",
-              backgroundSize: "300% 100%",
-              backgroundPosition: "120% 0",
-              mixBlendMode: "overlay",
-            }}
-          />
-          <div
-            className="absolute bottom-1.5 left-1.5 right-1.5 flex items-end justify-between gap-1"
-            style={{ pointerEvents: "none" }}
-          >
-            <div className="flex flex-wrap gap-1">
-              {card.types.slice(0, 2).map((t) => (
-                <TypeChip key={t} type={t} size="sm" style={chipStyle} />
-              ))}
-            </div>
-            <RarityBadge rarity={card.rarity} />
-          </div>
-          {(card.middle || card.last) && (
-            <div
-              className="absolute top-1.5 left-1.5 right-1.5"
-              style={{ pointerEvents: "none" }}
-            >
-              <div
-                className="rounded font-fraunces italic"
-                style={{
-                  background: "rgba(255, 248, 232, 0.94)",
-                  border: "1px dashed #c9a96a",
-                  color: "#3a2818",
-                  fontSize: w * 0.05,
-                  padding: `${w * 0.012}px ${w * 0.025}px`,
-                  lineHeight: 1.15,
-                  display: "inline-block",
-                  maxWidth: "100%",
-                }}
-              >
-                “{card.middle} {card.last}”
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
       <div
         style={{
           flex: 1,
@@ -180,13 +117,35 @@ export function GradedSlab({
           </div>
           <div
             style={{
-              fontWeight: 800,
-              fontSize: w * 0.055,
-              color: "#c44a2a",
-              letterSpacing: "0.02em",
+              display: "flex",
+              alignItems: "baseline",
+              gap: w * 0.025,
             }}
           >
-            HP {card.hp}
+            {card.hp > 0 && (
+              <div
+                style={{
+                  fontWeight: 800,
+                  fontSize: w * 0.055,
+                  color: "#c44a2a",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                HP {card.hp}
+              </div>
+            )}
+            {card.imageUrl1 && card.cardNumber && (
+              <div
+                style={{
+                  fontWeight: 700,
+                  fontSize: w * 0.04,
+                  color: "#7a6e5a",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {card.cardNumber}
+              </div>
+            )}
           </div>
         </div>
 
@@ -201,7 +160,7 @@ export function GradedSlab({
           }}
         >
           <div
-            className="pd-shimmer pointer-events-none absolute inset-0"
+            className="pd-shimmer pointer-events-none absolute inset-0 z-[2]"
             style={{
               background:
                 "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.65) 45%, transparent 60%)",
@@ -210,29 +169,42 @@ export function GradedSlab({
               mixBlendMode: "overlay",
             }}
           />
-          <Image
-            src={card.sprite}
-            alt={card.name}
-            width={Math.round(w * 0.7)}
-            height={Math.round(w * 0.7)}
-            className="relative z-[1] object-contain"
-            style={{ width: "85%", height: "85%" }}
-            unoptimized
-          />
-          <div
-            className="absolute top-1.5 left-1.5 font-bold"
-            style={{
-              fontSize: w * 0.04,
-              color: primary.color,
-              background: "#fff",
-              padding: "2px 6px",
-              borderRadius: 4,
-              border: `1px solid ${primary.color}`,
-              letterSpacing: "0.05em",
-            }}
-          >
-            #{String(card.pokeId).padStart(3, "0")}
-          </div>
+          {card.imageUrl1 ? (
+            <CroppedArt
+              src={card.imageUrl1}
+              alt={card.name}
+              cropX={card.artCropX ?? 0.07}
+              cropY={card.artCropY ?? 0.11}
+              cropW={card.artCropWidth ?? 0.86}
+              cropH={card.artCropHeight ?? 0.5}
+            />
+          ) : (
+            <Image
+              src={card.sprite}
+              alt={card.name}
+              width={Math.round(w * 0.7)}
+              height={Math.round(w * 0.7)}
+              className="relative z-[1] object-contain"
+              style={{ width: "85%", height: "85%" }}
+              unoptimized
+            />
+          )}
+          {card.pokeId > 0 && !card.imageUrl1 && (
+            <div
+              className="absolute top-1.5 left-1.5 z-[3] font-bold"
+              style={{
+                fontSize: w * 0.04,
+                color: primary.color,
+                background: "#fff",
+                padding: "2px 6px",
+                borderRadius: 4,
+                border: `1px solid ${primary.color}`,
+                letterSpacing: "0.05em",
+              }}
+            >
+              #{String(card.pokeId).padStart(3, "0")}
+            </div>
+          )}
         </div>
 
         <div
@@ -280,7 +252,46 @@ export function GradedSlab({
           </div>
         </div>
       </div>
-      )}
+    </div>
+  );
+}
+
+// Render a cropped portion of an image, scaled to fill the parent container.
+// Crop coords are normalized 0-1 within the source image.
+export function CroppedArt({
+  src,
+  alt,
+  cropX,
+  cropY,
+  cropW,
+  cropH,
+}: {
+  src: string;
+  alt: string;
+  cropX: number;
+  cropY: number;
+  cropW: number;
+  cropH: number;
+}) {
+  // Image is scaled so the crop area fills 100% of the container.
+  // Inverse-scale = 1/cropW (horizontal) and 1/cropH (vertical).
+  // The image's top-left sits at (-cropX/cropW, -cropY/cropH) relative to the container.
+  return (
+    <div className="relative z-[1] h-full w-full overflow-hidden">
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          position: "absolute",
+          width: `${100 / cropW}%`,
+          height: `${100 / cropH}%`,
+          left: `${(-cropX * 100) / cropW}%`,
+          top: `${(-cropY * 100) / cropH}%`,
+          maxWidth: "none",
+          objectFit: "fill",
+        }}
+        draggable={false}
+      />
     </div>
   );
 }

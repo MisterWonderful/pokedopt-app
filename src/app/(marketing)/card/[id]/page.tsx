@@ -59,34 +59,27 @@ export default async function CardDetailPage({
           {/* Card slab */}
           <div className="flex flex-col items-center gap-4 lg:sticky lg:top-24">
             <GradedSlab card={card} size="lg" />
-            {card.imageUrl2 && (
-              <a
-                href={card.imageUrl2}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-[220px] overflow-hidden rounded-xl border border-pd-ink/15 bg-white shadow-[0_2px_0_#29261b] transition-transform hover:-translate-y-0.5"
-                title="Back of card (click to enlarge)"
-              >
-                <img
-                  src={card.imageUrl2}
-                  alt={`${card.name} — back`}
-                  className="block h-auto w-full"
-                />
-                <div className="border-t border-pd-ink/10 px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-pd-ink-muted">
-                  Back scan
-                </div>
-              </a>
-            )}
-            {(card.setName || card.cardNumber) && (
-              <div className="text-center text-xs text-pd-ink-muted">
-                {[card.setName, card.cardNumber, card.year]
-                  .filter(Boolean)
-                  .join(" · ")}
-                {card.illustrator && (
-                  <div className="mt-0.5 italic">
-                    Illustrated by {card.illustrator}
-                  </div>
+            {(card.imageUrl1 || card.imageUrl2) && (
+              <div className="flex w-full justify-center gap-3">
+                {card.imageUrl1 && (
+                  <ScanThumb
+                    src={card.imageUrl1}
+                    alt={`${card.name} — front`}
+                    label="Front"
+                  />
                 )}
+                {card.imageUrl2 && (
+                  <ScanThumb
+                    src={card.imageUrl2}
+                    alt={`${card.name} — back`}
+                    label="Back"
+                  />
+                )}
+              </div>
+            )}
+            {card.illustrator && (
+              <div className="text-center text-xs italic text-pd-ink-muted">
+                Illustrated by {card.illustrator}
               </div>
             )}
           </div>
@@ -110,18 +103,26 @@ export default async function CardDetailPage({
 
             {/* Stats */}
             <div className="mt-6 overflow-hidden rounded-2xl border-[1.5px] border-pd-ink bg-white shadow-[0_4px_0_#29261b]">
-              <div className="grid grid-cols-4">
-                <DetailStat label="Grade" value={card.grade} hint="Well-Loved" />
-                <DetailStat label="HP" value={card.hp} hint="Hit Points" />
+              <div className="grid grid-cols-3">
                 <DetailStat
-                  label="Pokédex"
-                  value={`#${String(card.pokeId).padStart(3, "0")}`}
-                  hint="Number"
+                  label="Set"
+                  value={card.setName || card.grade || "—"}
+                  hint={card.stage || "Trading card"}
                 />
                 <DetailStat
-                  label="Birthday"
-                  value={card.birthday}
-                  hint="approx."
+                  label="Card #"
+                  value={
+                    card.cardNumber ||
+                    (card.pokeId
+                      ? `#${String(card.pokeId).padStart(3, "0")}`
+                      : "—")
+                  }
+                  hint="In set"
+                />
+                <DetailStat
+                  label="Birthyear"
+                  value={card.year || card.birthYear || card.birthday || "—"}
+                  hint="Year printed"
                   last
                 />
               </div>
@@ -208,6 +209,31 @@ export default async function CardDetailPage({
         )}
       </div>
     </div>
+  );
+}
+
+function ScanThumb({
+  src,
+  alt,
+  label,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+}) {
+  return (
+    <a
+      href={src}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block w-[140px] overflow-hidden rounded-xl border border-pd-ink/15 bg-white shadow-[0_2px_0_#29261b] transition-transform hover:-translate-y-0.5"
+      title={`${label} of card — click to enlarge`}
+    >
+      <img src={src} alt={alt} className="block h-auto w-full" />
+      <div className="border-t border-pd-ink/10 px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-pd-ink-muted">
+        {label}
+      </div>
+    </a>
   );
 }
 

@@ -58,6 +58,13 @@ model Card {
   imageUrl1     String?  @map("image_url_1")
   imageUrl2     String?  @map("image_url_2")
 
+  // Normalized crop (0-1) of imageUrl1 used as the art window in the slab.
+  // Defaults target the typical art portion of a TCG card.
+  artCropX      Float    @default(0.07)  @map("art_crop_x")
+  artCropY      Float    @default(0.11)  @map("art_crop_y")
+  artCropWidth  Float    @default(0.86)  @map("art_crop_w")
+  artCropHeight Float    @default(0.50)  @map("art_crop_h")
+
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
