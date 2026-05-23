@@ -6,7 +6,7 @@ import { TypeChip } from "@/components/cards/type-chip";
 import { RarityBadge } from "@/components/cards/rarity-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CreditCard, Pencil, Trash2, EyeOff, Eye } from "lucide-react";
+import { ArrowLeft, CreditCard, Pencil, Trash2, EyeOff, Eye, Upload } from "lucide-react";
 import { POKEMON_TYPES } from "@/lib/constants";
 
 interface Card {
@@ -64,6 +64,14 @@ export default function AdminCardsPage() {
   const [editing, setEditing] = useState<{ mode: "new" | "edit"; id?: string; form: CardForm } | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<null | {
+    created: number;
+    updated: number;
+    total: number;
+    errors: { row: number; sku?: string; message: string }[];
+  }>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -196,12 +204,100 @@ export default function AdminCardsPage() {
             placeholder="Search cards…"
           />
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                e.target.value = "";
+                setImporting(true);
+                setImportError(null);
+                setImportResult(null);
+                try {
+                  const text = await file.text();
+                  const res = await fetch("/api/admin/cards/import", {
+                    method: "POST",
+                    headers: { "Content-Type": "text/csv" },
+                    body: text,
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    setImportError(data.error || "Import failed");
+                  } else {
+                    setImportResult(data);
+                    load();
+                  }
+                } catch (err: any) {
+                  setImportError(err?.message || "Import failed");
+                } finally {
+                  setImporting(false);
+                }
+              }}
+            />
+            <span className="inline-flex">
+              <Button variant="secondary" asChild>
+                <span>
+                  <Upload size={16} /> {importing ? "Importing…" : "Import CSV"}
+                </span>
+              </Button>
+            </span>
+          </label>
           <Button onClick={openNew}>
             <CreditCard size={16} /> + New card
           </Button>
         </div>
       </div>
+
+      {(importResult || importError) && (
+        <div className="rounded-2xl border-2 border-pd-ink/10 bg-white p-4">
+          {importError && (
+            <div className="text-sm font-semibold text-red-700">
+              Import failed: {importError}
+            </div>
+          )}
+          {importResult && (
+            <div className="space-y-2">
+              <div className="text-sm font-bold text-pd-ink">
+                Imported {importResult.total} rows — created{" "}
+                <span className="text-pd-green">{importResult.created}</span>,
+                updated{" "}
+                <span className="text-pd-violet">{importResult.updated}</span>
+                {importResult.errors.length > 0 && (
+                  <>
+                    , <span className="text-red-700">{importResult.errors.length} error{importResult.errors.length === 1 ? "" : "s"}</span>
+                  </>
+                )}
+              </div>
+              {importResult.errors.length > 0 && (
+                <ul className="space-y-1 text-xs text-pd-ink-soft">
+                  {importResult.errors.slice(0, 8).map((e, i) => (
+                    <li key={i}>
+                      Row {e.row}
+                      {e.sku && ` (${e.sku})`}: {e.message}
+                    </li>
+                  ))}
+                  {importResult.errors.length > 8 && (
+                    <li>…and {importResult.errors.length - 8} more</li>
+                  )}
+                </ul>
+              )}
+              <button
+                onClick={() => {
+                  setImportResult(null);
+                  setImportError(null);
+                }}
+                className="text-xs font-bold text-pd-ink-muted underline"
+              >
+                dismiss
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-pd-ink/10 bg-white">
         <div className="grid grid-cols-[60px_2fr_1.5fr_auto_auto_auto_auto] gap-3.5 border-b border-pd-ink/10 bg-[#f7f3e8] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-pd-ink-muted">

@@ -21,6 +21,10 @@ interface CardTileProps {
     price: number;
     sprite: string;
     spritePixel: string;
+    imageUrl1?: string | null;
+    imageUrl2?: string | null;
+    setName?: string | null;
+    cardNumber?: string | null;
   };
 }
 

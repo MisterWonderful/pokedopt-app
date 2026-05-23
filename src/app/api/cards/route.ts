@@ -21,6 +21,11 @@ export async function GET(request: Request) {
       { middle: { contains: q, mode: "insensitive" } },
       { last: { contains: q, mode: "insensitive" } },
       { fullName: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+      { setName: { contains: q, mode: "insensitive" } },
+      { cardNumber: { contains: q, mode: "insensitive" } },
+      { originalTitle: { contains: q, mode: "insensitive" } },
+      { illustrator: { contains: q, mode: "insensitive" } },
     ];
   }
 

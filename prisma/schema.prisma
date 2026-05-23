@@ -27,28 +27,40 @@ enum Role {
 }
 
 model Card {
-  id          String   @id @default(cuid())
-  pokeId      Int      @map("poke_id")
-  name        String
-  middle      String
-  last        String
-  fullName    String   @map("full_name")
-  types       String[]
-  rarity      Rarity
-  hp          Int
-  grade       String
-  price       Decimal  @db.Decimal(10, 2)
-  donation    Decimal  @db.Decimal(10, 2)
-  backstory   String   @db.Text
-  wear        String   @db.Text
-  birthday    String
-  birthMonth  String   @map("birth_month")
-  birthYear   String   @map("birth_year")
-  sprite      String
-  spritePixel String   @map("sprite_pixel")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  sku           String?  @unique
+  pokeId        Int      @default(0) @map("poke_id")
+  name          String
+  middle        String   @default("")
+  last          String   @default("")
+  fullName      String   @map("full_name")
+  types         String[]
+  rarity        Rarity
+  hp            Int      @default(0)
+  grade         String   @default("")
+  price         Decimal  @db.Decimal(10, 2)
+  donation      Decimal  @db.Decimal(10, 2)
+  backstory     String   @default("") @db.Text
+  wear          String   @default("") @db.Text
+  birthday      String   @default("")
+  birthMonth    String   @default("") @map("birth_month")
+  birthYear     String   @default("") @map("birth_year")
+  sprite        String   @default("")
+  spritePixel   String   @default("") @map("sprite_pixel")
+
+  setName       String?  @map("set_name")
+  cardNumber    String?  @map("card_number")
+  year          String?
+  stage         String?
+  illustrator   String?
+  originalTitle String?  @map("original_title")
+  condition     String?
+  imageUrl1     String?  @map("image_url_1")
+  imageUrl2     String?  @map("image_url_2")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   orderItems OrderItem[]
 

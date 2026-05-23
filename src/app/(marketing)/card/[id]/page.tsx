@@ -57,8 +57,38 @@ export default async function CardDetailPage({
 
         <div className="grid gap-16 lg:grid-cols-[380px_1fr]">
           {/* Card slab */}
-          <div className="flex justify-center lg:sticky lg:top-24">
+          <div className="flex flex-col items-center gap-4 lg:sticky lg:top-24">
             <GradedSlab card={card} size="lg" />
+            {card.imageUrl2 && (
+              <a
+                href={card.imageUrl2}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-[220px] overflow-hidden rounded-xl border border-pd-ink/15 bg-white shadow-[0_2px_0_#29261b] transition-transform hover:-translate-y-0.5"
+                title="Back of card (click to enlarge)"
+              >
+                <img
+                  src={card.imageUrl2}
+                  alt={`${card.name} — back`}
+                  className="block h-auto w-full"
+                />
+                <div className="border-t border-pd-ink/10 px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-pd-ink-muted">
+                  Back scan
+                </div>
+              </a>
+            )}
+            {(card.setName || card.cardNumber) && (
+              <div className="text-center text-xs text-pd-ink-muted">
+                {[card.setName, card.cardNumber, card.year]
+                  .filter(Boolean)
+                  .join(" · ")}
+                {card.illustrator && (
+                  <div className="mt-0.5 italic">
+                    Illustrated by {card.illustrator}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Info */}

@@ -17,6 +17,10 @@ interface Card {
   grade: string;
   sprite: string;
   spritePixel: string;
+  imageUrl1?: string | null;
+  imageUrl2?: string | null;
+  setName?: string | null;
+  cardNumber?: string | null;
 }
 
 interface GradedSlabProps {
@@ -41,6 +45,7 @@ export function GradedSlab({
   const h = w * 1.27;
 
   const primary = POKEMON_TYPES[card.types[0]] || POKEMON_TYPES.normal;
+  const hasScan = !!card.imageUrl1;
 
   const frames = {
     classic: {
@@ -74,6 +79,72 @@ export function GradedSlab({
         flexShrink: 0,
       }}
     >
+      {hasScan ? (
+        <div
+          style={{
+            flex: 1,
+            background: "#fff",
+            border: "1.5px solid #29261b",
+            borderRadius: 8,
+            position: "relative",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Image
+            src={card.imageUrl1 as string}
+            alt={card.name}
+            width={Math.round(w)}
+            height={Math.round(w * 1.4)}
+            className="absolute inset-0 h-full w-full object-cover"
+            unoptimized
+          />
+          <div
+            className="pd-shimmer pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 45%, transparent 60%)",
+              backgroundSize: "300% 100%",
+              backgroundPosition: "120% 0",
+              mixBlendMode: "overlay",
+            }}
+          />
+          <div
+            className="absolute bottom-1.5 left-1.5 right-1.5 flex items-end justify-between gap-1"
+            style={{ pointerEvents: "none" }}
+          >
+            <div className="flex flex-wrap gap-1">
+              {card.types.slice(0, 2).map((t) => (
+                <TypeChip key={t} type={t} size="sm" style={chipStyle} />
+              ))}
+            </div>
+            <RarityBadge rarity={card.rarity} />
+          </div>
+          {(card.middle || card.last) && (
+            <div
+              className="absolute top-1.5 left-1.5 right-1.5"
+              style={{ pointerEvents: "none" }}
+            >
+              <div
+                className="rounded font-fraunces italic"
+                style={{
+                  background: "rgba(255, 248, 232, 0.94)",
+                  border: "1px dashed #c9a96a",
+                  color: "#3a2818",
+                  fontSize: w * 0.05,
+                  padding: `${w * 0.012}px ${w * 0.025}px`,
+                  lineHeight: 1.15,
+                  display: "inline-block",
+                  maxWidth: "100%",
+                }}
+              >
+                “{card.middle} {card.last}”
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
       <div
         style={{
           flex: 1,
@@ -209,6 +280,7 @@ export function GradedSlab({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

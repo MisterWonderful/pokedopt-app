@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const query = norm(q);
   const allCards = await prisma.card.findMany({ where: { isActive: true } });
 
-  // Search by cert number or name
+  // Search by cert number, SKU, original title, or name
   const results = allCards
     .map((card) => {
       const cert = norm(certFor(card));
@@ -25,6 +25,9 @@ export async function GET(request: Request) {
       const name = norm(card.name);
       const mid = norm(card.middle);
       const last = norm(card.last);
+      const sku = norm(card.sku || "");
+      const origTitle = norm(card.originalTitle || "");
+      const cardNum = norm(card.cardNumber || "");
 
       let score = 0;
       let kind = "name";
@@ -32,6 +35,12 @@ export async function GET(request: Request) {
       if (cert === query) {
         score = 100;
         kind = "cert";
+      } else if (sku === query) {
+        score = 98;
+        kind = "sku";
+      } else if (sku && sku.includes(query)) {
+        score = 85;
+        kind = "sku";
       } else if (cert.includes(query)) {
         score = 70;
         kind = "cert";
@@ -41,8 +50,12 @@ export async function GET(request: Request) {
         score = 80;
       } else if (mid === query || last === query) {
         score = 75;
+      } else if (origTitle === query) {
+        score = 78;
       } else if (full.includes(query)) {
         score = 60;
+      } else if (origTitle.includes(query) || cardNum === query) {
+        score = 55;
       } else if (name.includes(query) || mid.includes(query) || last.includes(query)) {
         score = 40;
       }
